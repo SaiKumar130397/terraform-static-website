@@ -88,8 +88,7 @@ resource "aws_s3_bucket_policy" "policy" {
             Resource = "${aws_s3_bucket.website.arn}/*"
             Condition = {                                   # To allow only this CloudFront (not any CloudFront)
                 StringEquals = {
-                    "AWS:SourceArn" =
-                      aws_cloudfront_distribution.cdn.arn
+                    "AWS:SourceArn" = aws_cloudfront_distribution.cdn.arn
                 }
             }
         }
