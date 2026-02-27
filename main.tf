@@ -18,7 +18,7 @@ resource "aws_s3_bucket_public_access_block" "block" {
 }
 
 resource "aws_s3_object" "files" {
-    for_each = fileset("website/", "*.html)
+    for_each = fileset("website/", "*.html")
     bucket = aws_s3_bucket.website.id
     key = each.value
     source = "website/${each.value}"
