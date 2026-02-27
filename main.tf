@@ -39,7 +39,7 @@ resource "aws_s3_object" "files" {
 }
 
 resource "aws_s3_object" "assets" {
-    for_each = fileset("assets/", "*")
+    for_each = fileset("assets/", "**")
     bucket = aws_s3_bucket.assets.id
     key = each.value
     source = "assets/${each.value}"
