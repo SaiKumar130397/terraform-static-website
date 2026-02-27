@@ -1,0 +1,11 @@
+<svg width="400" height="200" xmlns="http://www.w3.org/2000/svg">
+
+  <rect width="400" height="200" fill="#0f2027"/>
+
+  <text x="50%" y="50%" fill="white" font-size="30" text-anchor="middle">
+
+    DevOps CloudFront Demo
+
+  </text>
+
+</svg>
