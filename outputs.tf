@@ -4,7 +4,7 @@ output "cloudfront_url" {
 }
 
 output "image_url" {
-  value = "https://${aws_cloudfront_distribution.cdn.domain_name}devops.svg"
+  value = "https://${aws_cloudfront_distribution.cdn.domain_name}/devops.svg"
 }
 
 output "website_bucket_name" {
