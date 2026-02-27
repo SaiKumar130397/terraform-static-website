@@ -17,10 +17,11 @@ resource "aws_s3_bucket_public_access_block" "block" {
     restrict_public_buckets = true
 }
 
-resource "aws_s3_object" "index" {
+resource "aws_s3_object" "files" {
+    for_each = fileset("website/", "*.html)
     bucket = aws_s3_bucket.website.id
-    key = "index.html"
-    source = "website/index.html"
+    key = each.value
+    source = "website/${each.value}"
     content_type = "text/html"
 }
 
