@@ -1,1 +1,1 @@
-bucket_name = "sai-static-website-130397"
+bucket_name = "my-static-website-123456789"

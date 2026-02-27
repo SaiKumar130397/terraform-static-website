@@ -2,6 +2,10 @@ resource "aws_s3_bucket" "website" {
     bucket = var.bucket_name
 }
 
+resource "aws_s3_bucket" "assets" {
+    bucket = var.assets_bucket_name
+}
+
 /*
 To block public access in any form.
 Block and limit public access control limits.
@@ -17,12 +21,29 @@ resource "aws_s3_bucket_public_access_block" "block" {
     restrict_public_buckets = true
 }
 
+resource "aws_s3_bucket_public_access_block" "assets_block" {
+    bucket = aws_s3_bucket.assets.id
+
+    block_public_acls = true
+    ignore_public_acls = true
+    block_public_policy = true
+    restrict_public_buckets = true
+}
+
 resource "aws_s3_object" "files" {
     for_each = fileset("website/", "*.html")
     bucket = aws_s3_bucket.website.id
     key = each.value
     source = "website/${each.value}"
     content_type = "text/html"
+}
+
+resource "aws_s3_object" "assets" {
+    for_each = fileset("assets/", "*")
+    bucket = aws_s3_bucket.assets.id
+    key = each.value
+    source = "assets/${each.value}"
+    content_type = "image/svg+xml"
 }
 
 /*
@@ -50,10 +71,31 @@ resource "aws_cloudfront_distribution" "cdn" {
         origin_access_control_id = aws_cloudfront_origin_access_control.oac.id      # Attaches OAC to origin.
     }
 
-    default_cache_behavior {
+    default_cache_behavior {                # Only ONE default_cache_behavior
         allowed_methods = ["GET", "HEAD"] 
         cached_methods = ["GET", "HEAD"]   # allow only read operations
         target_origin_id = "s3-origin"
+        viewer_protocol_policy = "redirect-to-https"
+
+        forwarded_values {
+            query_string = false
+            cookies {
+                forward = "none"
+            }
+        }
+    }
+
+    origin {
+        domain_name = aws_s3_bucket.assets.bucket_regional_domain_name
+        origin_id = "assets-origin"
+        origin_access_control_id = aws_cloudfront_origin_access_control.oac.id
+    }
+
+    ordered_cache_behavior {                # Multiple ordered_cache_behavior
+        path_pattern = "/images/*"
+        allowed_methods = ["GET", "HEAD"] 
+        cached_methods = ["GET", "HEAD"]   # allow only read operations
+        target_origin_id = "assets-origin"
         viewer_protocol_policy = "redirect-to-https"
 
         forwarded_values {
@@ -88,6 +130,28 @@ resource "aws_s3_bucket_policy" "policy" {
             Action = "s3:GetObject"
             Resource = "${aws_s3_bucket.website.arn}/*"
             Condition = {                                   # To allow only this CloudFront (not any CloudFront)
+                StringEquals = {
+                    "AWS:SourceArn" = aws_cloudfront_distribution.cdn.arn
+                }
+            }
+        }
+        ]
+    })
+}
+
+resource "aws_s3_bucket_policy" "assets_policy" {
+    bucket = aws_s3_bucket.assets.id
+    policy = jsonencode({                       
+        Version = "2012-10-17"
+        Statement = [
+        {
+            Effect = "Allow"
+            Principal = {
+                Service = "cloudfront.amazonaws.com"
+            }
+            Action = "s3:GetObject"
+            Resource = "${aws_s3_bucket.assets.arn}/*"
+            Condition = {                                   
                 StringEquals = {
                     "AWS:SourceArn" = aws_cloudfront_distribution.cdn.arn
                 }

@@ -6,3 +6,7 @@ variable "region" {
 variable "bucket_name" {
   description = "Unique S3 bucket name"
 }
+
+variable "assets_bucket_name" {
+  description = "Unique S3 bucket name"
+}
