@@ -129,6 +129,8 @@ helm repo add prometheus-community https://prometheus-community.github.io/helm-c
 helm repo update
 
 helm install monitoring prometheus-community/kube-prometheus-stack
+--namespace monitoring \
+--create-namespace
 
 # -------------------------------
 # Cleanup
