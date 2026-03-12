@@ -137,9 +137,9 @@ done
 
 echo "Kubernetes ready. Installing monitoring stack..."
 
-sudo -u ubuntu helm install monitoring prometheus-community/kube-prometheus-stack
+sudo -u ubuntu helm install monitoring prometheus-community/kube-prometheus-stack \
   --namespace monitoring \
-  --create-namespace
+  --create-namespace || true
 
 # -------------------------------
 # Cleanup
