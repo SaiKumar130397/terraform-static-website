@@ -49,7 +49,7 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 sudo systemctl enable docker
 sudo systemctl start docker
 
-sudo usermod -aG docker $USER
+sudo usermod -aG docker ubuntu
 
 echo "Docker installed"
 
@@ -67,7 +67,7 @@ sudo mv kubectl /usr/local/bin/
 
 echo "Starting Kubernetes cluster..."
 
-minikube start --driver=docker
+sudo -u ubuntu minikube start --driver=docker
 
 # -------------------------------
 # Install Helm
