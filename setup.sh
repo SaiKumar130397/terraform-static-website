@@ -53,9 +53,11 @@ sudo usermod -aG docker $USER
 
 echo "Docker installed"
 
-# -------------------------------
-# Install kubectl
-# -------------------------------
+echo "Installing Minikube..."
+
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
 echo "Installing kubectl..."
 
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -63,7 +65,9 @@ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stabl
 chmod +x kubectl
 sudo mv kubectl /usr/local/bin/
 
-echo "kubectl installed"
+echo "Starting Kubernetes cluster..."
+
+minikube start --driver=docker
 
 # -------------------------------
 # Install Helm
@@ -116,40 +120,15 @@ curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 echo "Azure CLI installed"
 
 # -------------------------------
-# Install Node Exporter
+# Install Prometheus stack
 # -------------------------------
-echo "Installing Node Exporter..."
+echo "Installing Prometheus stack..."
 
-cd /tmp
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
-NODE_EXPORTER_VERSION="1.7.0"
+helm repo update
 
-wget https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz
-
-tar xvf node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz
-
-sudo mv node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64/node_exporter /usr/local/bin/
-
-sudo useradd --no-create-home --shell /bin/false node_exporter || true
-
-cat <<EOF | sudo tee /etc/systemd/system/node_exporter.service
-[Unit]
-Description=Node Exporter
-After=network.target
-
-[Service]
-User=node_exporter
-ExecStart=/usr/local/bin/node_exporter
-
-[Install]
-WantedBy=default.target
-EOF
-
-sudo systemctl daemon-reload
-sudo systemctl enable node_exporter
-sudo systemctl start node_exporter
-
-echo "Node Exporter installed."
+helm install monitoring prometheus-community/kube-prometheus-stack
 
 # -------------------------------
 # Cleanup
