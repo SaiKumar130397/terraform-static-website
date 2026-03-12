@@ -124,13 +124,22 @@ echo "Azure CLI installed"
 # -------------------------------
 echo "Installing Prometheus stack..."
 
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+sudo -u ubuntu helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+sudo -u ubuntu helm repo update
 
-helm repo update
+echo "Waiting for Kubernetes API..."
 
-helm install monitoring prometheus-community/kube-prometheus-stack
---namespace monitoring \
---create-namespace
+until sudo -u ubuntu kubectl get nodes >/dev/null 2>&1
+do
+  echo "Kubernetes not ready yet..."
+  sleep 20
+done
+
+echo "Kubernetes ready. Installing monitoring stack..."
+
+sudo -u ubuntu helm install monitoring prometheus-community/kube-prometheus-stack
+  --namespace monitoring \
+  --create-namespace
 
 # -------------------------------
 # Cleanup
